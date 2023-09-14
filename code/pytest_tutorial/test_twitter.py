@@ -10,11 +10,11 @@ from twitter import Twitter
 #     return twitter
 
 @pytest.fixture()
-def prepare_backend_file():
-    # instead of creating backend file in proper function we can mock it here and pass
-    # to fixture_twitter, it doesn't need tear down delete later also
-    with open('test.txt', 'w') as backend_file:
-        pass
+def prepare_backend_file(tmpdir):
+    temp_file = tmpdir.join('test.txt')
+    temp_file.write('')
+    return temp_file
+
 
 # @pytest.fixture(autouse=True)
 # def prepare_backend_file():
@@ -23,11 +23,13 @@ def prepare_backend_file():
 #         pass
 
 
-@pytest.fixture(params=[None, 'test.txt'], name='twitter')
+@pytest.fixture(params=['list', 'prepare_backend_file'], name='twitter')
 def fixture_twitter(prepare_backend_file, request):
-    twitter = Twitter(backend=request.param)
-    yield twitter
-    twitter.delete()
+    if request.param == 'list':
+        twitter = Twitter()
+    elif request.param == 'prepare_backend_file':
+        twitter = Twitter(backend=prepare_backend_file)
+    return twitter
 
 
 def test_initialization(twitter):
@@ -55,6 +57,15 @@ def test_long_message(twitter):
 
 def test_tweet_with_hashtag(twitter):
     assert 'the' in twitter.find_hashtag('This is #the first message wish hashtag')
+
+def test_initialize_two_twitter_classes(prepare_backend_file):
+    twitter1 = Twitter(backend=prepare_backend_file)
+    twitter2 = Twitter(backend=prepare_backend_file)
+
+    twitter1.tweet('Test message1')
+    twitter2.tweet('Test message2')
+
+    assert twitter1.tweets == ['Test message1', 'Test message2']
 
 
 # Parametrize
