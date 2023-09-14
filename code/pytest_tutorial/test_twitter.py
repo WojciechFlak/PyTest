@@ -9,9 +9,22 @@ from twitter import Twitter
 #     twitter = Twitter()
 #     return twitter
 
+@pytest.fixture()
+def prepare_backend_file():
+    # instead of creating backend file in proper function we can mock it here and pass
+    # to fixture_twitter, it doesn't need tear down delete later also
+    with open('test.txt', 'w') as backend_file:
+        pass
 
-@pytest.fixture(params=[None, 'test.txt'])
-def twitter(request):
+# @pytest.fixture(autouse=True)
+# def prepare_backend_file():
+#     # auto-use runs before every test and is considered as unsafe method
+#     with open('test.txt', 'w') as backend_file:
+#         pass
+
+
+@pytest.fixture(params=[None, 'test.txt'], name='twitter')
+def fixture_twitter(prepare_backend_file, request):
     twitter = Twitter(backend=request.param)
     yield twitter
     twitter.delete()
