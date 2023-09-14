@@ -4,37 +4,37 @@ from twitter import Twitter
 
 
 # Fixture
-@pytest.fixture(scope='function')
-def twitter():
-    twitter = Twitter()
-    return twitter
-
-
-# @pytest.fixture
+# @pytest.fixture(scope='function')
 # def twitter():
 #     twitter = Twitter()
-#     yield twitter
-#     twitter.delete()
+#     return twitter
 
 
-def test_initialization():
-    twitter = Twitter()
+@pytest.fixture(params=[None, 'test.txt'])
+def twitter(request):
+    twitter = Twitter(backend=request.param)
+    yield twitter
+    twitter.delete()
+
+
+def test_initialization(twitter):
+    # twitter = Twitter()
     assert twitter
 
 
-def test_single_message():
+def test_single_message(twitter):
     # Given
-    twitter = Twitter()
+    # twitter = Twitter()
     # When
     twitter.tweet('TEST MESSAGE 1')
     # Then
     assert twitter.tweets == ['TEST MESSAGE 1']
 
 
-def test_long_message():
+def test_long_message(twitter):
     # here we expect both Exception (context manager works as assertion)
     # and that the list will be empty - then test passes
-    twitter = Twitter()
+    # twitter = Twitter()
     with pytest.raises(Exception):
         twitter.tweet('test'*41)
     assert twitter.tweets == []
@@ -53,5 +53,5 @@ def test_tweet_with_hashtag(twitter):
         ('This is the #first message wish #hashtag', ['first', 'hashtag'])
 ))
 def test_different_hashtags(twitter, message, expected):
-    twitter = Twitter()
+    # twitter = Twitter()
     assert twitter.find_hashtag(message) == expected
