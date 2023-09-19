@@ -1,0 +1,26 @@
+We can run interactive pythone console inside code and have access to variables and so on.
+Just put below line in required place
+import pdb; pdb.set_trace()
+
+Also there is simmilar module WDB. That one requires to start server by wdb.server. It provides
+the same functionality but in more readable browser window.
+
+
+
+
+To test single test from file:
+pytest test_twitter.py::test_find_all_hashtags
+-vvv willl produce more descriptive info
+
+To test single file:
+pytest test_fizz_buzz.py
+
+Test all test with keyword(in this example 'hashtag'):
+
+pytest -k hashtag
+
+
+Side note
+To decale env variable:
+export NO_SUMMING=1
+printenv / printenv NO_SUMMING

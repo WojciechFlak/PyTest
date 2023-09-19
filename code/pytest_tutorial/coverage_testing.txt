@@ -1,0 +1,7 @@
+pip install pytest.cov
+
+pytest --cov twitter
+
+To test which lines are not covered with tests:
+pytest --cov twitter --cov-report annotate
+It generates files in cd with illustrative description.

@@ -39,7 +39,9 @@ class Twitter:
     def tweet(self, message):
         if len(message) > 160:
             raise Exception('Message too long')
-        self.tweets.append({'message': message, 'avatar': self.get_user_avatar()})
+        self.tweets.append({'message': message,
+                            'avatar': self.get_user_avatar(),
+                            'hashtags': self.find_hashtag(message)})
         if self.backend:
             self.backend.write(json.dumps(self.tweets))
 
@@ -47,9 +49,14 @@ class Twitter:
     def find_hashtag(message):
         return [m.lower() for m in re.findall('#(\w+)', message)]
 
+    def find_all_hashtags(self):
+        hashtags = []
+        for message in self.tweets:
+            hashtags.extend(message['hashtags'])
+        if hashtags:
+            return set(hashtags)
+        return 'No hashtags found'
+
 
 if __name__ == '__main__':
-
-    t = Twitter(username='python')
-    t.tweet('sth')
-    print(t.tweets)
+    pass

@@ -18,17 +18,6 @@ class ResponseGetMock(object):
 #     twitter = Twitter()
 #     return twitter
 
-@pytest.fixture()
-def prepare_backend_file(tmpdir):
-    temp_file = tmpdir.join('test.txt')
-    temp_file.write('')
-    return temp_file
-
-
-@pytest.fixture(autouse=True)
-def no_requests(monkeypatch):
-    monkeypatch.delattr('requests.sessions.Session.request')
-
 
 # @pytest.fixture(autouse=True)
 # def prepare_backend_file():
@@ -103,5 +92,14 @@ def test_tweet_with_username(avatar_mock, twitter):
     if not twitter.username:
         pytest.skip()
     twitter.tweet('Test message')
-    assert twitter.tweets == [{'message': 'Test message', 'avatar': 'test'}]
+    assert twitter.tweets == [{'message': 'Test message', 'avatar': 'test', 'hashtags': []}]
     avatar_mock.assert_called()
+
+
+@patch.object(requests, 'get', return_value=ResponseGetMock())
+def test_get_all_hashtags(avatar_mock, twitter):
+    assert twitter.find_all_hashtags() == 'No hashtags found'
+    twitter.tweet('Test #first')
+    twitter.tweet('Test #first #second')
+    twitter.tweet('Test #3rd')
+    assert twitter.find_all_hashtags() == {'first', 'second', '3rd'}
