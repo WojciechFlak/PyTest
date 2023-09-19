@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 import requests
 
@@ -45,11 +47,6 @@ def fixture_twitter(prepare_backend_file, username, request, monkeypatch):
         twitter = Twitter(username=username)
     elif request.param == 'prepare_backend_file':
         twitter = Twitter(backend=prepare_backend_file, username=username)
-
-    def monkey_return(url):
-        return ResponseGetMock()
-
-    monkeypatch.setattr(requests, 'get', monkey_return)
     return twitter
 
 
@@ -58,12 +55,9 @@ def test_initialization(twitter):
     assert twitter
 
 
-def test_single_message(twitter):
-    # Given
-    # twitter = Twitter()
-    # When
+@patch.object(Twitter, 'get_user_avatar', return_value='test')
+def test_single_message(avatar_mock, twitter):
     twitter.tweet('TEST MESSAGE 1')
-    # Then
     assert twitter.tweet_messages == ['TEST MESSAGE 1']
 
 
@@ -103,8 +97,11 @@ def test_different_hashtags(twitter, message, expected):
     assert twitter.find_hashtag(message) == expected
 
 
-def test_tweet_with_username(twitter):
+# this patch mocks basically the same as in test_single_message but in different manner
+@patch.object(requests, 'get', return_value=ResponseGetMock())
+def test_tweet_with_username(avatar_mock, twitter):
     if not twitter.username:
         pytest.skip()
     twitter.tweet('Test message')
     assert twitter.tweets == [{'message': 'Test message', 'avatar': 'test'}]
+    avatar_mock.assert_called()

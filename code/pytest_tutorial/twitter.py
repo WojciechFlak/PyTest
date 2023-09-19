@@ -33,6 +33,7 @@ class Twitter:
 
         url = urljoin(USERS_API, self.username)
         resp = requests.get(url)
+        # import wdb; wdb.set_trace()
         return resp.json()['avatar_url']
 
     def tweet(self, message):
